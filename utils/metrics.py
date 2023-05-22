@@ -67,7 +67,20 @@ def ap_per_class(tp, conf, pred_cls, target_cls, v5_metric=False, plot=False, sa
                     py.append(np.interp(px, mrec, mpre))  # precision at mAP@0.5
 
     # Compute F1 (harmonic mean of precision and recall)
+    def f_beta(p, r, beta=1.0):
+        return (1 + beta ** 2) * p * r / (beta ** 2 * p + r + 1e-16)
+
     f1 = 2 * p * r / (p + r + 1e-16)
+    best_thresholds = np.zeros(10)
+    precision_importances = np.linspace(1, 10, 10)
+    for precision_importance in range(1, 11):
+        beta = 1 / precision_importance
+        fvals = f_beta(p, r, beta=beta)
+        best_threshold = fvals[0].argmax() / 1000.0
+        best_thresholds[precision_importance - 1] = best_threshold
+
+    print(best_thresholds)
+    print("Best thresold is ", np.median(best_thresholds))
     if plot:
         plot_pr_curve(px, py, ap, Path(save_dir) / 'PR_curve.png', names)
         plot_mc_curve(px, f1, Path(save_dir) / 'F1_curve.png', names, ylabel='F1')
