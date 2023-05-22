@@ -195,7 +195,7 @@ if __name__ == '__main__':
         if opt.include_nms:
             print('Registering NMS plugin for ONNX...')
             mo = RegisterNMS(f)
-            mo.register_nms()
+            mo.register_nms(score_thresh=opt.conf_thres, nms_thresh=opt.iou_thres, detections_per_img=opt.topk_all)
             mo.save(f)
 
     except Exception as e:
